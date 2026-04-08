@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { GROCERY_ITEMS, CATEGORIES } from '../../constants/products';
 
-const { width } = Dimensions.get('window');
+// Unused width removed
 
 export default function HomeScreen() {
   const { items, addToCart, removeFromCart, total } = useCart();
@@ -46,7 +46,7 @@ export default function HomeScreen() {
         <View style={styles.productInfo}>
           <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
           <Text style={styles.productCategory}>{item.category}</Text>
-          <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+          <Text style={styles.productPrice}>₹{item.price.toFixed(2)}</Text>
         </View>
         
         <View style={styles.addButtonWrapper}>
@@ -189,7 +189,7 @@ export default function HomeScreen() {
                </View>
             </View>
             <View style={{marginLeft: 12}}>
-              <Text style={styles.cartFooterTotal}>${total.toFixed(2)}</Text>
+              <Text style={styles.cartFooterTotal}>₹{total.toFixed(2)}</Text>
               <Text style={styles.cartFooterSubtitle}>Includes taxes & fees</Text>
             </View>
           </View>
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#f1f4f8', 
     borderRadius: 14, paddingHorizontal: 12, height: 48, borderWidth: 1, borderColor: '#eef1f5' 
   },
-  searchInput: { flex: 1, paddingHorizontal: 10, fontSize: 15, color: '#333', outlineStyle: 'none' },
+  searchInput: { flex: 1, paddingHorizontal: 10, fontSize: 15, color: '#333' },
   
   bannerContainer: { margin: 16, height: 160, borderRadius: 24, overflow: 'hidden', position: 'relative' },
   bannerImage: { width: '100%', height: '100%', borderRadius: 24 },
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   productPrice: { fontSize: 16, fontWeight: '900', color: '#0f172a', marginTop: 6 },
   
   addButtonWrapper: { position: 'absolute', bottom: 12, left: 12, right: 12 },
-  addButton: { backgroundColor: '#fff', borderWeight: 1.5, borderColor: '#FF3269', borderWidth: 1.5, borderRadius: 12, paddingVertical: 8, alignItems: 'center' },
+  addButton: { backgroundColor: '#fff', borderColor: '#FF3269', borderWidth: 1.5, borderRadius: 12, paddingVertical: 8, alignItems: 'center' },
   addButtonText: { color: '#FF3269', fontWeight: '800', fontSize: 14 },
   
   quantityControl: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FF3269', borderRadius: 12, padding: 4 },

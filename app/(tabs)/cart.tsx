@@ -33,7 +33,7 @@ export default function CartScreen() {
       <Image source={{ uri: item.image }} style={styles.itemImage} />
       <View style={styles.itemInfo}>
         <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.itemPrice}>${item.price.toFixed(2)} / item</Text>
+        <Text style={styles.itemPrice}>₹{item.price.toFixed(2)} / item</Text>
       </View>
       
       <View style={styles.quantityControl}>
@@ -90,18 +90,18 @@ export default function CartScreen() {
                 <Text style={styles.billTitle}>Bill Details</Text>
                 <View style={styles.billRow}>
                   <Text style={styles.billLabel}>Item Total</Text>
-                  <Text style={styles.billValue}>${total.toFixed(2)}</Text>
+                  <Text style={styles.billValue}>₹{total.toFixed(2)}</Text>
                 </View>
                 <View style={styles.billRow}>
                   <Text style={styles.billLabel}>Delivery Fee</Text>
                   <Text style={styles.billValue}>
-                    {deliveryFee === 0 ? <Text style={{color: '#4caf50'}}>FREE</Text> : `$${deliveryFee.toFixed(2)}`}
+                    {deliveryFee === 0 ? <Text style={{color: '#4caf50'}}>FREE</Text> : `₹${deliveryFee.toFixed(2)}`}
                   </Text>
                 </View>
                 <View style={styles.divider} />
                 <View style={styles.billRow}>
                   <Text style={styles.billTotalLabel}>Grand Total</Text>
-                  <Text style={styles.billTotalValue}>${grandTotal.toFixed(2)}</Text>
+                  <Text style={styles.billTotalValue}>₹{grandTotal.toFixed(2)}</Text>
                 </View>
               </View>
             )}
@@ -128,7 +128,7 @@ export default function CartScreen() {
               ) : (
                 <View style={styles.checkoutBtnContent}>
                   <View>
-                    <Text style={styles.checkoutBtnAmount}>${grandTotal.toFixed(2)}</Text>
+                    <Text style={styles.checkoutBtnAmount}>₹{grandTotal.toFixed(2)}</Text>
                     <Text style={styles.checkoutBtnSub}>TOTAL</Text>
                   </View>
                   <Text style={styles.checkoutButtonText}>Proceed to Pay  →</Text>
