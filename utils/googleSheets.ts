@@ -1,7 +1,5 @@
 // Send data to Google Sheets via Google Apps Script Web App URL
-// You need to replace the URL below with your actual deployed script URL.
-
-const GOOGLE_SCRIPT_WEB_APP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxLLvpwV9Ksa7XcGGY8s9xGe1Zy0c14n-wHYn4nTYwpVT8c8rWePV4LkODBwx94cftTRg/exec';
 
 export const sendOrderToGoogleSheets = async (orderData: {
   orderId: string;
@@ -11,16 +9,11 @@ export const sendOrderToGoogleSheets = async (orderData: {
   longitude: number | null;
   timestamp: string;
 }) => {
-  if (GOOGLE_SCRIPT_WEB_APP_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-    console.warn('Google Sheets integration URL not configured. Skipping submission.');
-    return;
-  }
-
   try {
     const response = await fetch(GOOGLE_SCRIPT_WEB_APP_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain;charset=utf-8', // Using text/plain to avoid CORS preflight issues with GAS
       },
       body: JSON.stringify(orderData),
     });
