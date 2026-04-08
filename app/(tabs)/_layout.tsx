@@ -12,7 +12,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#FF3269', // Zepto/Swiggy like branding color
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
@@ -26,8 +26,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Cart',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
+          href: null, // Hide it from bottom bar
         }}
       />
     </Tabs>
