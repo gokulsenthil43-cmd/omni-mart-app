@@ -1,98 +1,126 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
+import { useCart, Product } from '../../context/CartContext';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const GROCERY_ITEMS: Product[] = [
+  { id: '1', name: 'Fresh Apples (1kg)', price: 4.99, category: 'Fruits', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6faa6?w=400&q=80' },
+  { id: '2', name: 'Organic Bananas (1 Dozen)', price: 2.99, category: 'Fruits', image: 'https://images.unsplash.com/photo-1571501478200-264245d1f7c5?w=400&q=80' },
+  { id: '3', name: 'Whole Milk (1 Gallon)', price: 3.49, category: 'Dairy', image: 'https://images.unsplash.com/photo-1563636619276-2f8e4c1f7bfd?w=400&q=80' },
+  { id: '4', name: 'Farm Eggs (12 pcs)', price: 2.89, category: 'Dairy', image: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=400&q=80' },
+  { id: '5', name: 'Whole Wheat Bread', price: 2.49, category: 'Bakery', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80' },
+  { id: '6', name: 'Chicken Breast (1kg)', price: 8.99, category: 'Meat', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&q=80' },
+];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { addToCart } = useCart();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const renderItem = ({ item }: { item: Product }) => (
+    <View style={styles.card}>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <View style={styles.infoContainer}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.category}>{item.category}</Text>
+        <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+        <TouchableOpacity style={styles.addButton} onPress={() => addToCart(item)}>
+          <Text style={styles.addButtonText}>Add to Cart</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>OmniMart</Text>
+        <Text style={styles.headerSubtitle}>Fresh Groceries Delivered</Text>
+      </View>
+      <FlatList
+        data={GROCERY_ITEMS}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.listContainer}
+        numColumns={Platform.OS === 'web' ? 3 : 2}
+        key={Platform.OS === 'web' ? 'web' : 'mobile'}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  stepContainer: {
-    gap: 8,
+  header: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    ...Platform.select({
+      web: {
+        alignItems: 'center',
+      }
+    })
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+  },
+  listContainer: {
+    padding: 10,
+    alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    margin: 8,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    flex: 1,
+    maxWidth: Platform.OS === 'web' ? 300 : '100%',
+  },
+  image: {
+    width: '100%',
+    height: 150,
+  },
+  infoContainer: {
+    padding: 12,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  category: {
+    fontSize: 12,
+    color: '#888',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  price: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 12,
+  },
+  addButton: {
+    backgroundColor: '#2e7d32',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
