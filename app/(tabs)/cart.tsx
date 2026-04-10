@@ -17,10 +17,8 @@ export default function CartScreen() {
     setIsCheckingOut(true);
     
     try {
-      // 1. Request Location Permission
+      // 1. Request Location Permission with High Accuracy
       let { status } = await Location.requestForegroundPermissionsAsync();
-      let latitude = null;
-      let longitude = null;
       
       if (status !== 'granted') {
         Alert.alert('Permission Denied', 'Location permission is required to deliver your order.');
@@ -28,45 +26,82 @@ export default function CartScreen() {
         return;
       }
 
-      // 2. Get Current Location
+      // 2. Get Current Location (Exact - Best for Navigation)
       let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.BestForNavigation,
       });
-      latitude = location.coords.latitude;
-      longitude = location.coords.longitude;
+      const { latitude, longitude } = location.coords;
 
-      // 3. Prepare Order Data
+      // 3. Reverse Geocoding to get Precise Address
+      let addressStr = 'Unknown Address';
+      let areaShortName = 'Unknown Area';
+      
+      try {
+        let addressResponse = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+
+        if (addressResponse.length > 0) {
+          const addr = addressResponse[0];
+          // specificLocation: Building name, street, sub-locality, city, pincode
+          const parts = [
+            addr.name,
+            addr.street,
+            addr.district,
+            addr.city,
+            addr.postalCode ? `PIN: ${addr.postalCode}` : ''
+          ].filter(Boolean);
+          
+          addressStr = parts.join(', ');
+          areaShortName = addr.district || addr.city || 'Unknown Area';
+        }
+      } catch (geocodingError) {
+        console.warn('Geocoding failed:', geocodingError);
+      }
+
+      // 4. Create Google Maps Link
+      const mapLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+      // 5. Prepare Order Data
+      // The keys here must match what the Google Apps Script expects
       const orderData = {
+        timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
         orderId: `OMN-${Math.floor(Math.random() * 1000000)}`,
-        total: total + (total > 0 && total < 10 ? 2.50 : 0),
         items: items.map(i => `${i.quantity}x ${i.name}`).join(', '),
+        total: grandTotal,
+        specificLocation: addressStr,
+        areaName: areaShortName,
+        mapLink: mapLink,
         latitude: latitude,
         longitude: longitude,
-        timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
       };
 
-      // 4. Send to Google Sheets
-      await sendOrderToGoogleSheets(orderData);
-
-      // 5. Success Feedback
-      setIsCheckingOut(false);
-      Alert.alert(
-        'Order Confirmed! 🎉',
-        'Your fresh groceries will reach you in 10-15 minutes. We have tracked your location for delivery.',
-        [
-          { 
-            text: 'OK', 
-            onPress: () => {
-              clearCart();
-              router.replace('/');
-            } 
-          }
-        ]
-      );
+      // 6. Send to Google Sheets
+      const response = await sendOrderToGoogleSheets(orderData);
+      
+      if (response && response.result === 'success') {
+        setIsCheckingOut(false);
+        Alert.alert(
+          'Order Confirmed! 🎉',
+          `Delivering to: ${addressStr}. Your driver has your exact location.`,
+          [
+            { 
+              text: 'OK', 
+              onPress: () => {
+                clearCart();
+                router.replace('/');
+              } 
+            }
+          ]
+        );
+      } else {
+         throw new Error('Sync failed');
+      }
     } catch (error) {
       console.error('Checkout Error:', error);
       setIsCheckingOut(false);
-      Alert.alert('Checkout Failed', 'Something went wrong while placing your order. Please try again.');
+      Alert.alert('Checkout Failed', 'Something went wrong. Please check your internet and try again.');
     }
   };
 
@@ -126,7 +161,7 @@ export default function CartScreen() {
             ListHeaderComponent={() => (
                <View style={styles.deliveryBadge}>
                  <IconSymbol name="timer" size={20} color="#FF3269" />
-                 <Text style={styles.deliveryBadgeText}>Delivering to your <Text style={{fontWeight: 'bold'}}>Current Location</Text></Text>
+                 <Text style={styles.deliveryBadgeText}>Delivering to your <Text style={{fontWeight: 'bold'}}>Exact Location</Text></Text>
                </View>
             )}
             ListFooterComponent={() => (
@@ -156,8 +191,8 @@ export default function CartScreen() {
                    <IconSymbol name="paperplane.fill" size={20} color="#FF3269" />
                 </View>
                 <View style={styles.addressInfo}>
-                   <Text style={styles.addressTitle}>Current Location Tracking</Text>
-                   <Text style={styles.addressDesc} numberOfLines={1}>Location will be captured on checkout</Text>
+                   <Text style={styles.addressTitle}>Ulltra-Precise Tracking</Text>
+                   <Text style={styles.addressDesc} numberOfLines={1}>Exact coordinates will be sent to driver</Text>
                 </View>
              </View>
              
@@ -169,7 +204,7 @@ export default function CartScreen() {
               {isCheckingOut ? (
                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <ActivityIndicator color="#fff" style={{marginRight: 10}} />
-                    <Text style={[styles.checkoutButtonText, {fontSize: 14}]}>LOGGING LOCATION & ORDER...</Text>
+                    <Text style={[styles.checkoutButtonText, {fontSize: 14}]}>CAPTURING EXACT LOCATION...</Text>
                  </View>
               ) : (
                 <View style={styles.checkoutBtnContent}>
@@ -194,7 +229,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff',
     borderBottomWidth: 1, borderBottomColor: '#eee',
-    paddingTop: Platform.OS === 'android' ? 40 : 12,
+    paddingTop: Platform.OS === 'android' ? 40 : 45,
   },
   backBtn: { padding: 4 },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#111' },
